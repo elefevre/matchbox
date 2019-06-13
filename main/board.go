@@ -60,29 +60,17 @@ func (b *Board) CountCoin(column byte) byte {
 
 func (b *Board) HasWon(color PlayerColor) bool {
 	for column := byte(0); column < numberOfColumns; column++ {
-		countCoinsInARow := 0
-		for row := byte(0); row < numberOfRows; row++ {
-			if b.coins[column][row] == color {
-				countCoinsInARow++
-				if countCoinsInARow == 4 {
-					return true
-				}
-			} else {
-				countCoinsInARow = 0
+		for row := byte(0); row < numberOfRows-3; row++ {
+			if b.coins[column][row+0] == color && b.coins[column][row+1] == color && b.coins[column][row+2] == color && b.coins[column][row+3] == color {
+				return true
 			}
 		}
 	}
 
 	for row := byte(0); row < numberOfRows; row++ {
-		countCoinsInARow := 0
-		for column := byte(0); column < numberOfColumns; column++ {
-			if b.coins[column][row] == color {
-				countCoinsInARow++
-				if countCoinsInARow == 4 {
-					return true
-				}
-			} else {
-				countCoinsInARow = 0
+		for column := byte(0); column < numberOfColumns-3; column++ {
+			if b.coins[column+0][row] == color && b.coins[column+1][row] == color && b.coins[column+2][row] == color && b.coins[column+3][row] == color {
+				return true
 			}
 		}
 	}
@@ -90,6 +78,14 @@ func (b *Board) HasWon(color PlayerColor) bool {
 	for row := byte(0); row < numberOfRows-3; row++ {
 		for column := byte(0); column < numberOfColumns-3; column++ {
 			if b.coins[column+0][row+0] == color && b.coins[column+1][row+1] == color && b.coins[column+2][row+2] == color && b.coins[column+3][row+3] == color {
+				return true
+			}
+		}
+	}
+
+	for row := byte(0); row < numberOfRows-3; row++ {
+		for column := byte(0); column < numberOfColumns-3; column++ {
+			if b.coins[column+3][row+0] == color && b.coins[column+2][row+1] == color && b.coins[column+1][row+2] == color && b.coins[column+0][row+3] == color {
 				return true
 			}
 		}

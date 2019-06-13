@@ -136,7 +136,7 @@ func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_row(t *testin
 	}
 }
 
-func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_diagonal(t *testing.T) {
+func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_diagonal_starting_from_the_lower_left(t *testing.T) {
 	comm := func(column startColumnFor4CoinsInARowType, numberOfOpponentCoinsBelow coinsBelow4CoinsInAColumnType, player PlayerColor) bool {
 		opponent := yellow
 		if player == yellow {
@@ -146,13 +146,13 @@ func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_diagonal(t *t
 		board := &Board{}
 
 		for i := byte(0); i < byte(numberOfOpponentCoinsBelow); i++ {
-			board.InsertCoin(opponent, byte(column))
+			board.InsertCoin(opponent, byte(column+0))
 			board.InsertCoin(opponent, byte(column+1))
 			board.InsertCoin(opponent, byte(column+2))
 			board.InsertCoin(opponent, byte(column+3))
 		}
 
-		board.InsertCoin(player, byte(column))
+		board.InsertCoin(player, byte(column+0))
 		if board.HasWon(player) {
 			return false
 		}
@@ -180,19 +180,47 @@ func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_diagonal(t *t
 	}
 }
 
-func assertWin(t *testing.T, board *Board, color PlayerColor) {
-	t.Helper()
-	won := board.HasWon(color)
-	if !won {
-		t.Errorf("expected %s to win", color.String())
-	}
-}
+func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_diagonal_starting_from_the_upper_right(t *testing.T) {
+	comm := func(column startColumnFor4CoinsInARowType, numberOfOpponentCoinsBelow coinsBelow4CoinsInAColumnType, player PlayerColor) bool {
+		opponent := yellow
+		if player == yellow {
+			opponent = red
+		}
 
-func assertNotWin(t *testing.T, board *Board, color PlayerColor) {
-	t.Helper()
-	won := board.HasWon(color)
-	if won {
-		t.Errorf("expected %s not to win", color.String())
+		board := &Board{}
+
+		for i := byte(0); i < byte(numberOfOpponentCoinsBelow); i++ {
+			board.InsertCoin(opponent, byte(column+0))
+			board.InsertCoin(opponent, byte(column+1))
+			board.InsertCoin(opponent, byte(column+2))
+			board.InsertCoin(opponent, byte(column+3))
+		}
+
+		board.InsertCoin(opponent, byte(column+0))
+		board.InsertCoin(opponent, byte(column+0))
+		board.InsertCoin(opponent, byte(column+0))
+		board.InsertCoin(player, byte(column+0))
+		if board.HasWon(player) {
+			return false
+		}
+		board.InsertCoin(opponent, byte(column+1))
+		board.InsertCoin(opponent, byte(column+1))
+		board.InsertCoin(player, byte(column+1))
+		if board.HasWon(player) {
+			return false
+		}
+		board.InsertCoin(opponent, byte(column+2))
+		board.InsertCoin(player, byte(column+2))
+		if board.HasWon(player) {
+			return false
+		}
+		board.InsertCoin(player, byte(column+3))
+
+		return board.HasWon(player)
+	}
+
+	if err := quick.Check(comm, nil); err != nil {
+		t.Error(err)
 	}
 }
 
