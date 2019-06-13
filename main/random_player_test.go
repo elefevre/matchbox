@@ -1,22 +1,47 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"testing/quick"
+)
 
 func TestRandomPlayer_plays_in_one_of_the_7_columns(t *testing.T) {
-	player := randomPlayer{}
+	comm := func(color PlayerColor) bool {
+		player := newRandomPlayer(color)
 
-	nextPlay := player.NextPlay()
-	if nextPlay < 0 || nextPlay >= 7 {
-		t.Errorf("expected to play one of the 7 columns, but got an %d", nextPlay)
+		board := &Board{}
+
+		nextPlay := player.NextPlay(*board)
+		return nextPlay >= 0 && nextPlay < numberOfColumns
+	}
+
+	if err := quick.Check(comm, nil); err != nil {
+		t.Error(err)
 	}
 }
 
-
 func TestRandomPlayer_plays_in_a_column_with_free_slots(t *testing.T) {
-	player := randomPlayer{}
+	comm := func(columnToFill columnType, color PlayerColor) bool {
+		player := newRandomPlayer(color)
+		opponent := yellow
+		if color == yellow {
+			opponent = red
+		}
 
-	nextPlay := player.NextPlay()
-	if nextPlay < 0 || nextPlay >= 7 {
-		t.Errorf("expected to play one of the 7 columns, but got an %d", nextPlay)
+		board := &Board{}
+		board.InsertCoin(opponent, byte(columnToFill))
+		board.InsertCoin(opponent, byte(columnToFill))
+		board.InsertCoin(opponent, byte(columnToFill))
+		board.InsertCoin(opponent, byte(columnToFill))
+		board.InsertCoin(opponent, byte(columnToFill))
+		board.InsertCoin(opponent, byte(columnToFill))
+		board.InsertCoin(opponent, byte(columnToFill))
+
+		nextPlay := player.NextPlay(*board)
+		return nextPlay != byte(columnToFill)
+	}
+
+	if err := quick.Check(comm, nil); err != nil {
+		t.Error(err)
 	}
 }

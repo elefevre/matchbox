@@ -39,14 +39,14 @@ type Board struct {
 	coins [numberOfColumns][numberOfRows]PlayerColor
 }
 
-func (b *Board) InsertCoin(coin PlayerColor, column byte) *Board {
+func (b *Board) InsertCoin(coin PlayerColor, column byte) error {
 	for row := byte(0); row < numberOfRows; row++ {
 		if b.coins[column][row] == empty {
 			b.coins[column][row] = coin
-			return b
+			return nil
 		}
 	}
-	return b
+	return fmt.Errorf("column %d is full", column)
 }
 
 func (b *Board) CountCoin(column byte) byte {
@@ -110,4 +110,16 @@ func (b *Board) String() string {
 		b.coins[0][1].ShortString(), b.coins[1][1].ShortString(), b.coins[2][1].ShortString(), b.coins[3][1].ShortString(), b.coins[4][1].ShortString(), b.coins[5][1].ShortString(), b.coins[6][1].ShortString(),
 		b.coins[0][0].ShortString(), b.coins[1][0].ShortString(), b.coins[2][0].ShortString(), b.coins[3][0].ShortString(), b.coins[4][0].ShortString(), b.coins[5][0].ShortString(), b.coins[6][0].ShortString(),
 	)
+}
+
+func (b *Board) isFull() bool {
+	for column := byte(0); column < numberOfColumns; column++ {
+		for row := byte(0); row < numberOfRows; row++ {
+			if b.coins[column][row] == empty {
+				return false
+			}
+		}
+	}
+
+	return true
 }

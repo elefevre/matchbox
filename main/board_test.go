@@ -224,6 +224,65 @@ func TestBoard_player_wins_when_there_are_4_consecutive_coins_in_a_diagonal_star
 	}
 }
 
+type randomFullBoard Board
+
+func (randomFullBoard) Generate(r *rand.Rand, size int) reflect.Value {
+	b := &Board{}
+	for row := byte(0); row < numberOfRows; row++ {
+		for column := byte(0); column < numberOfColumns; column++ {
+			n := r.Int31n(2)
+			if n == 0 {
+				b.InsertCoin(yellow, column)
+			} else {
+				b.InsertCoin(red, column)
+			}
+		}
+
+	}
+	return reflect.ValueOf(randomFullBoard(*b))
+}
+
+func TestBoard_board_is_full_when_all_slots_are_populated(t *testing.T) {
+	comm := func(board randomFullBoard) bool {
+		b := Board(board)
+		return (&b).isFull()
+	}
+
+	if err := quick.Check(comm, nil); err != nil {
+		t.Error(err)
+	}
+}
+
+type randomSparseBoard Board
+
+func (randomSparseBoard) Generate(r *rand.Rand, size int) reflect.Value {
+	b := &Board{}
+	for row := byte(0); row < numberOfRows; row++ {
+		for column := byte(0); column < numberOfColumns; column++ {
+			n := r.Int31n(3)
+			if n == 0 {
+				b.InsertCoin(yellow, column)
+			} else if n == 1 {
+				b.InsertCoin(red, column)
+			}
+		}
+
+	}
+	return reflect.ValueOf(randomSparseBoard(*b))
+}
+
+func TestBoard_board_is_not_full_when_some_slots_are_still_empty(t *testing.T) {
+	comm := func(board randomSparseBoard) bool {
+		b := Board(board)
+		b2 := &b
+		return !b2.isFull()
+	}
+
+	if err := quick.Check(comm, nil); err != nil {
+		t.Error(err)
+	}
+}
+
 func assertNumberOfCoins(t *testing.T, expectedNumber byte, board *Board, column byte) {
 	t.Helper()
 	coins := board.CountCoin(column)
