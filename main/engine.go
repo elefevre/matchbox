@@ -8,21 +8,24 @@ import (
 func main() {
 	yellowPlayer := newRandomPlayer(yellow)
 
-	redPlayer := newRandomPlayer(red)
+	redPlayer := newReinforcedPlayer(red)
 
 	yellowWins := 0
 	redWins := 0
 	draws := 0
-	for i := 0; i < 10000; i++ {
-		winner, draw := playGame(yellowPlayer, redPlayer)
+	for i := 0; i < 10000000; i++ {
+		winner, loser, draw := playGame(yellowPlayer, redPlayer)
 		if draw {
 			draws++
-		}
-		if winner == yellowPlayer {
-			yellowWins++
-		}
-		if winner == redPlayer {
-			redWins++
+		} else {
+			winner.Won()
+			loser.Lost()
+			if winner == yellowPlayer {
+				yellowWins++
+			}
+			if winner == redPlayer {
+				redWins++
+			}
 		}
 	}
 
@@ -31,7 +34,7 @@ func main() {
 	fmt.Println("draws", draws, "times")
 }
 
-func playGame(yellowPlayer Player, redPlayer Player) (winner Player, draw bool) {
+func playGame(yellowPlayer Player, redPlayer Player) (winner Player, loser Player, draw bool) {
 	board := &Board{}
 	for ; ; {
 		var nextPlay byte
@@ -44,10 +47,10 @@ func playGame(yellowPlayer Player, redPlayer Player) (winner Player, draw bool) 
 		}
 
 		if board.HasWon(yellow) {
-			return yellowPlayer, false
+			return yellowPlayer, redPlayer, false
 		}
 		if board.isFull() {
-			return nil, true
+			return nil, nil, true
 		}
 
 		nextPlay = redPlayer.NextPlay(*board)
@@ -58,10 +61,10 @@ func playGame(yellowPlayer Player, redPlayer Player) (winner Player, draw bool) 
 		}
 
 		if board.HasWon(red) {
-			return redPlayer, false
+			return redPlayer, yellowPlayer, false
 		}
 		if board.isFull() {
-			return nil, true
+			return nil, nil, true
 		}
 	}
 }

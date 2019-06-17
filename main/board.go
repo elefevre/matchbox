@@ -4,6 +4,8 @@ import "fmt"
 
 type Player interface {
 	NextPlay(Board) byte
+	Won()
+	Lost()
 }
 
 type PlayerColor byte

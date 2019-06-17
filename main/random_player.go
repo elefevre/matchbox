@@ -24,3 +24,11 @@ func (r *randomPlayer) NextPlay(b Board) byte {
 		}
 	}
 }
+
+func (r *randomPlayer) Won() {
+	// nothing to do here
+}
+
+func (r *randomPlayer) Lost() {
+	// nothing to do here
+}
