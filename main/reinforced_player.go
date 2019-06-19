@@ -20,6 +20,7 @@ type reinforcedPlayer struct {
 func (r *reinforcedPlayer) NextPlay(b Board) byte {
 	beads, ok := r.beads[b]
 	if !ok {
+		// first time we find this board configuration
 		beads = [numberOfColumns]int{1, 1, 1, 1, 1, 1, 1}
 	}
 
@@ -33,16 +34,19 @@ func (r *reinforcedPlayer) NextPlay(b Board) byte {
 			}
 		}
 		err := b.InsertCoin(r.color, candidateColumn)
-		if err == nil {
-			r.beads[b] = beads
-			r.boardsInCurrentGame = append(r.boardsInCurrentGame, b)
-			r.columnsPlayed = append(r.columnsPlayed, candidateColumn)
-			return candidateColumn;
+		if err != nil {
+			// impossible to insert, so we discard all beads for that column
+			// this should prevent it from being a candidate again
+			if beads[candidateColumn] > 0 {
+				beads[candidateColumn] = 0
+			}
+			continue
 		}
 
-		if beads[candidateColumn] > 0 {
-			beads[candidateColumn] -= 1
-		}
+		r.beads[b] = beads
+		r.boardsInCurrentGame = append(r.boardsInCurrentGame, b)
+		r.columnsPlayed = append(r.columnsPlayed, candidateColumn)
+		return candidateColumn;
 	}
 }
 
@@ -58,7 +62,7 @@ func (r *reinforcedPlayer) Won() {
 	r.columnsPlayed = nil
 	r.numberOfGamesNotified++
 
-	if len(r.beads) > 2*r.numberOfMatchBoxesNotified {
+	if len(r.beads) > 1000000 + r.numberOfMatchBoxesNotified {
 		r.numberOfMatchBoxesNotified = len(r.beads)
 
 		var m runtime.MemStats
